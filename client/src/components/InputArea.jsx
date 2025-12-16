@@ -6,7 +6,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
     const progress = Math.min((tokensUsed / totalTokens) * 100, 100);
     const isNearLimit = progress > 90;
 
-    // Hero Mode (before first message) - Smaller, cleaner
+    // Hero Mode (before first message)
     if (!hasStarted) {
         return (
             <div style={{
@@ -14,8 +14,8 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 top: '40%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '90%',
-                maxWidth: '600px',
+                width: '75%',
+                maxWidth: '550px',
                 zIndex: 20,
                 padding: '24px'
             }}>
@@ -24,30 +24,39 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                 >
-                    {/* Title */}
+                    {/* Title - Anime Style */}
                     <h1 style={{
                         fontSize: '56px',
-                        fontWeight: '900',
+                        fontWeight: '800',
                         color: 'white',
                         textAlign: 'center',
-                        marginBottom: '16px',
-                        letterSpacing: '-0.02em'
+                        marginBottom: '12px',
+                        letterSpacing: '0.2em',
+                        fontFamily: '"Orbitron", sans-serif',
+                        textTransform: 'uppercase',
+                        textShadow: '0 0 30px rgba(0, 255, 245, 0.4)'
                     }}>
-                        <span style={{ color: '#00fff5' }}>AI</span>NIME
+                        <span style={{
+                            color: '#00fff5',
+                            textShadow: '0 0 40px rgba(0, 255, 245, 0.6), 0 0 80px rgba(0, 255, 245, 0.3)'
+                        }}>AI</span>NIME
                     </h1>
 
-                    {/* Subtitle */}
+                    {/* Subtitle - Dramatic */}
                     <p style={{
-                        fontSize: '18px',
+                        fontSize: '16px',
                         color: 'rgba(255, 255, 255, 0.6)',
                         textAlign: 'center',
                         marginBottom: '32px',
-                        fontWeight: '300'
+                        fontWeight: '300',
+                        letterSpacing: '0.15em',
+                        fontFamily: '"Rajdhani", sans-serif',
+                        textTransform: 'uppercase'
                     }}>
                         Your anime & manga expert
                     </p>
 
-                    {/* Compact Input */}
+                    {/* Search Input */}
                     <form onSubmit={sendMessage} style={{ position: 'relative' }}>
                         <input
                             type="text"
@@ -57,23 +66,28 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                             disabled={isLoading || isSessionExhausted}
                             style={{
                                 width: '100%',
-                                background: 'rgba(0, 0, 0, 0.5)',
+                                background: 'rgba(255, 255, 255, 0.08)',
                                 backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                border: '1px solid rgba(255, 255, 255, 0.15)',
                                 color: 'white',
-                                fontSize: '16px',
-                                borderRadius: '12px',
-                                padding: '16px 60px 16px 20px',
+                                fontSize: '15px',
+                                fontFamily: '"Outfit", sans-serif',
+                                letterSpacing: '0.03em',
+                                borderRadius: '50px',
+                                padding: '18px 56px 18px 24px',
                                 outline: 'none',
-                                transition: 'all 0.3s'
+                                transition: 'all 0.3s',
+                                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)'
                             }}
                             onFocus={(e) => {
                                 e.target.style.borderColor = '#00fff5';
-                                e.target.style.boxShadow = '0 0 20px rgba(0, 255, 245, 0.2)';
+                                e.target.style.boxShadow = '0 0 25px rgba(0, 255, 245, 0.2), inset 0 0 20px rgba(0, 255, 245, 0.05)';
+                                e.target.style.background = 'rgba(255, 255, 255, 0.12)';
                             }}
                             onBlur={(e) => {
-                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                                e.target.style.boxShadow = 'none';
+                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                                e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.2)';
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
                             }}
                             autoFocus
                         />
@@ -85,14 +99,17 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                                 right: '8px',
                                 top: '50%',
                                 transform: 'translateY(-50%)',
-                                background: '#00fff5',
-                                color: '#0f0c29',
-                                padding: '10px',
-                                borderRadius: '8px',
+                                background: input.trim() ? 'linear-gradient(135deg, #00fff5, #00cccc)' : 'rgba(255, 255, 255, 0.1)',
+                                color: input.trim() ? '#0f0c29' : 'rgba(255, 255, 255, 0.3)',
+                                padding: '12px',
+                                borderRadius: '50%',
                                 border: 'none',
-                                cursor: input.trim() ? 'pointer' : 'not-allowed',
-                                opacity: input.trim() ? 1 : 0.3,
-                                transition: 'all 0.3s'
+                                cursor: input.trim() ? 'pointer' : 'default',
+                                transition: 'all 0.3s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: input.trim() ? '0 0 20px rgba(0, 255, 245, 0.4)' : 'none'
                             }}
                         >
                             <Send size={18} />
@@ -103,102 +120,121 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
         );
     }
 
-    // Chat Mode - Compact bottom bar
+    // Chat Mode - Floating elements
     return (
         <div style={{
-            position: 'relative',
+            position: 'absolute',
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '75%',
+            maxWidth: '600px',
             zIndex: 30,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(30px)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px'
         }}>
-            {/* Progress Bar */}
-            <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '2px',
-                background: 'rgba(255, 255, 255, 0.05)'
-            }}>
-                <div style={{
-                    height: '100%',
-                    width: `${progress}%`,
-                    background: isNearLimit ? '#ef4444' : '#00fff5',
-                    transition: 'width 0.5s'
-                }} />
-            </div>
-
-            {/* Token Counter - Compact */}
+            {/* Token Counter - Floating */}
             <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '12px',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '11px',
                 color: 'rgba(255, 255, 255, 0.5)',
-                padding: '8px 20px 6px',
-                fontFamily: 'monospace'
+                fontFamily: '"Rajdhani", monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                background: 'rgba(0, 0, 0, 0.4)',
+                backdropFilter: 'blur(10px)',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.05)'
             }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Zap size={12} color={isNearLimit ? '#ef4444' : '#00fff5'} />
-                    Tokens
-                </span>
-                <span style={{ color: isNearLimit ? '#ef4444' : 'rgba(255, 255, 255, 0.7)' }}>
-                    {tokensUsed} / {totalTokens}
+                <Zap size={11} color={isNearLimit ? '#ef4444' : '#00fff5'} />
+                <span>Tokens</span>
+                <div style={{
+                    width: '60px',
+                    height: '3px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '2px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        width: `${progress}%`,
+                        height: '100%',
+                        background: isNearLimit ? '#ef4444' : 'linear-gradient(90deg, #00fff5, #00cccc)',
+                        transition: 'width 0.5s',
+                        boxShadow: isNearLimit ? '0 0 10px #ef4444' : '0 0 10px rgba(0, 255, 245, 0.5)'
+                    }} />
+                </div>
+                <span style={{
+                    color: isNearLimit ? '#ef4444' : 'rgba(255, 255, 255, 0.7)',
+                    fontWeight: '600'
+                }}>
+                    {tokensUsed}/{totalTokens}
                 </span>
             </div>
 
-            {/* Compact Input */}
-            <div style={{ padding: '0 20px 16px' }}>
-                <form onSubmit={sendMessage} style={{ position: 'relative' }}>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Continue the conversation..."
-                        disabled={isLoading || isSessionExhausted}
-                        style={{
-                            width: '100%',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            color: 'white',
-                            fontSize: '15px',
-                            borderRadius: '10px',
-                            padding: '14px 60px 14px 16px',
-                            outline: 'none',
-                            transition: 'all 0.3s'
-                        }}
-                        onFocus={(e) => {
-                            e.target.style.borderColor = '#00fff5';
-                            e.target.style.background = 'rgba(255, 255, 255, 0.08)';
-                        }}
-                        onBlur={(e) => {
-                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                            e.target.style.background = 'rgba(255, 255, 255, 0.05)';
-                        }}
-                        autoFocus
-                    />
-                    <button
-                        type="submit"
-                        disabled={!input.trim() || isLoading || isSessionExhausted}
-                        style={{
-                            position: 'absolute',
-                            right: '8px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            background: '#00fff5',
-                            color: '#0f0c29',
-                            padding: '10px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            cursor: input.trim() ? 'pointer' : 'not-allowed',
-                            opacity: input.trim() ? 1 : 0.3,
-                            transition: 'all 0.3s'
-                        }}
-                    >
-                        <Send size={18} />
-                    </button>
-                </form>
-            </div>
+            {/* Floating Input */}
+            <form onSubmit={sendMessage} style={{ position: 'relative', width: '100%' }}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Continue the conversation..."
+                    disabled={isLoading || isSessionExhausted}
+                    style={{
+                        width: '100%',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        fontSize: '14px',
+                        fontFamily: '"Outfit", sans-serif',
+                        letterSpacing: '0.03em',
+                        borderRadius: '50px',
+                        padding: '16px 56px 16px 24px',
+                        outline: 'none',
+                        transition: 'all 0.3s',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
+                    }}
+                    onFocus={(e) => {
+                        e.target.style.borderColor = '#00fff5';
+                        e.target.style.boxShadow = '0 0 25px rgba(0, 255, 245, 0.15)';
+                        e.target.style.background = 'rgba(0, 0, 0, 0.6)';
+                    }}
+                    onBlur={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.3)';
+                        e.target.style.background = 'rgba(0, 0, 0, 0.5)';
+                    }}
+                    autoFocus
+                />
+                <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading || isSessionExhausted}
+                    style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: input.trim() ? 'linear-gradient(135deg, #00fff5, #00cccc)' : 'rgba(255, 255, 255, 0.1)',
+                        color: input.trim() ? '#0f0c29' : 'rgba(255, 255, 255, 0.3)',
+                        padding: '12px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        cursor: input.trim() ? 'pointer' : 'default',
+                        transition: 'all 0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: input.trim() ? '0 0 15px rgba(0, 255, 245, 0.4)' : 'none'
+                    }}
+                >
+                    <Send size={16} />
+                </button>
+            </form>
         </div>
     );
 }

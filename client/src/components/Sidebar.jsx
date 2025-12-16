@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MessageSquare, Trash2, X, Video, Sparkles } from 'lucide-react';
+import React from 'react';
+import { MessageSquare, Trash2, X, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackground }) {
@@ -44,7 +44,8 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                             padding: '24px',
                             display: 'flex',
                             flexDirection: 'column',
-                            boxShadow: '0 0 40px rgba(0, 0, 0, 0.5)'
+                            boxShadow: '0 0 60px rgba(0, 0, 0, 0.5)',
+                            fontFamily: '"Outfit", sans-serif'
                         }}
                     >
                         {/* Header */}
@@ -55,10 +56,12 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                             marginBottom: '32px'
                         }}>
                             <h2 style={{
-                                fontSize: '24px',
-                                fontWeight: 'bold',
+                                fontSize: '22px',
+                                fontWeight: '700',
                                 color: 'white',
-                                letterSpacing: '0.1em'
+                                letterSpacing: '0.15em',
+                                fontFamily: '"Orbitron", sans-serif',
+                                textTransform: 'uppercase'
                             }}>
                                 <span style={{ color: '#00fff5' }}>AI</span>NIME
                             </h2>
@@ -73,7 +76,7 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                                     borderRadius: '8px',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#00fff5'}
                                 onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)'}
                             >
                                 <X size={20} />
@@ -85,45 +88,37 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                             <div style={{
                                 fontSize: '11px',
                                 color: 'rgba(255, 255, 255, 0.4)',
-                                fontFamily: 'monospace',
+                                fontFamily: '"Rajdhani", sans-serif',
                                 marginBottom: '12px',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.1em'
+                                letterSpacing: '0.2em',
+                                fontWeight: '600'
                             }}>
                                 Chat History
                             </div>
 
                             {/* Current Session */}
                             <div style={{
-                                padding: '12px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                borderRadius: '10px',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                padding: '14px 16px',
+                                background: 'rgba(0, 255, 245, 0.08)',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(0, 255, 245, 0.2)',
                                 fontSize: '14px',
-                                color: 'rgba(255, 255, 255, 0.7)',
+                                color: 'white',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px',
+                                gap: '12px',
                                 marginBottom: '8px'
-                            }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                    e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.3)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                                }}
-                            >
-                                <MessageSquare size={14} color="#ff007a" />
-                                <span>Current Session</span>
+                            }}>
+                                <MessageSquare size={16} color="#00fff5" />
+                                <span style={{ fontWeight: '500' }}>Current Session</span>
                             </div>
 
                             {/* Previous Sessions Placeholder */}
                             <div style={{
-                                fontSize: '11px',
+                                fontSize: '12px',
                                 color: 'rgba(255, 255, 255, 0.3)',
                                 marginTop: '16px',
                                 fontStyle: 'italic'
@@ -136,7 +131,7 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                         <div style={{
                             marginTop: 'auto',
                             paddingTop: '20px',
-                            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '10px'
@@ -151,18 +146,27 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '10px',
-                                        padding: '12px',
+                                        padding: '14px',
                                         background: 'rgba(0, 255, 245, 0.1)',
                                         border: '1px solid rgba(0, 255, 245, 0.3)',
                                         color: '#00fff5',
-                                        borderRadius: '10px',
+                                        borderRadius: '12px',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         fontSize: '14px',
-                                        fontWeight: '500'
+                                        fontWeight: '600',
+                                        fontFamily: '"Rajdhani", sans-serif',
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 255, 245, 0.2)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 255, 245, 0.1)'}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(0, 255, 245, 0.2)';
+                                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 245, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(0, 255, 245, 0.1)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
                                 >
                                     <Video size={16} />
                                     <span>Change Background</span>
@@ -178,18 +182,27 @@ export default function Sidebar({ isOpen, onClose, resetSession, onChangeBackgro
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: '10px',
-                                    padding: '12px',
+                                    padding: '14px',
                                     background: 'rgba(239, 68, 68, 0.1)',
                                     border: '1px solid rgba(239, 68, 68, 0.3)',
                                     color: '#ef4444',
-                                    borderRadius: '10px',
+                                    borderRadius: '12px',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
                                     fontSize: '14px',
-                                    fontWeight: '500'
+                                    fontWeight: '600',
+                                    fontFamily: '"Rajdhani", sans-serif',
+                                    letterSpacing: '0.1em',
+                                    textTransform: 'uppercase'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                                    e.currentTarget.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
                             >
                                 <Trash2 size={16} />
                                 <span>Reset Session</span>
