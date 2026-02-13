@@ -1,0 +1,405 @@
+[
+  {
+    "id": "anime_backgrounds/Berserk Rage",
+    "name": "Berserk Rage",
+    "originalName": "Berserk Rage.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Berserk%20Rage.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Berserk%20Rage.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "berserk",
+      "guts",
+      "rage",
+      "dark",
+      "intense",
+      "action"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/bleach ichigo",
+    "name": "bleach ichigo",
+    "originalName": "bleach ichigo.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/bleach%20ichigo.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/bleach%20ichigo.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "bleach",
+      "ichigo",
+      "soul reaper",
+      "action",
+      "sword"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Bleach",
+    "name": "Bleach",
+    "originalName": "Bleach.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Bleach.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Bleach.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "bleach",
+      "soul reaper",
+      "action",
+      "dark"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/goku vegeta",
+    "name": "goku vegeta",
+    "originalName": "goku vegeta.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/goku%20vegeta.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/goku%20vegeta.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "goku",
+      "vegeta",
+      "dragon ball",
+      "dbz",
+      "saiyan",
+      "battle",
+      "action"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Gon",
+    "name": "Gon",
+    "originalName": "Gon.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Gon.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Gon.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "gon",
+      "hunter x hunter",
+      "hxh",
+      "power",
+      "intense",
+      "transformation"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Himeno Chainsaw Man",
+    "name": "Himeno Chainsaw Man",
+    "originalName": "Himeno Chainsaw Man.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Himeno%20Chainsaw%20Man.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Himeno%20Chainsaw%20Man.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "himeno",
+      "chainsaw man",
+      "csm",
+      "emotional",
+      "waifu"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/hunter x hunter",
+    "name": "hunter x hunter",
+    "originalName": "hunter x hunter.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/hunter%20x%20hunter.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/hunter%20x%20hunter.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "hunter x hunter",
+      "hxh",
+      "gon",
+      "killua",
+      "adventure"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/kaneki vs arima",
+    "name": "kaneki vs arima",
+    "originalName": "kaneki vs arima.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/kaneki%20vs%20arima.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/kaneki%20vs%20arima.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "kaneki",
+      "arima",
+      "tokyo ghoul",
+      "battle",
+      "dark",
+      "intense"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/kaoruko waguri",
+    "name": "kaoruko waguri",
+    "originalName": "kaoruko waguri.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/kaoruko%20waguri.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/kaoruko%20waguri.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "kaoruko",
+      "waguri",
+      "waifu",
+      "cute",
+      "aesthetic"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/ladies chainsaw man",
+    "name": "ladies chainsaw man",
+    "originalName": "ladies chainsaw man.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/ladies%20chainsaw%20man.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/ladies%20chainsaw%20man.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "chainsaw man",
+      "csm",
+      "makima",
+      "power",
+      "waifu",
+      "girls"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/One Piece",
+    "name": "One Piece",
+    "originalName": "One Piece.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/One%20Piece.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/One%20Piece.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "one piece",
+      "luffy",
+      "pirate",
+      "adventure",
+      "epic"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Shanks One Piece",
+    "name": "Shanks One Piece",
+    "originalName": "Shanks One Piece.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Shanks%20One%20Piece.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Shanks%20One%20Piece.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "shanks",
+      "one piece",
+      "yonko",
+      "red hair",
+      "epic",
+      "pirate"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Sukuna x Hello Kitty",
+    "name": "Sukuna x Hello Kitty",
+    "originalName": "Sukuna x Hello Kitty.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Sukuna%20x%20Hello%20Kitty.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Sukuna%20x%20Hello%20Kitty.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "sukuna",
+      "jjk",
+      "hello kitty",
+      "funny",
+      "cute",
+      "crossover"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Waguri Kaoruko window",
+    "name": "Waguri Kaoruko window",
+    "originalName": "Waguri Kaoruko window.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Waguri%20Kaoruko%20window.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Waguri%20Kaoruko%20window.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "kaoruko",
+      "waguri",
+      "waifu",
+      "aesthetic",
+      "cute",
+      "window"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Waguri Kaoruko x rintaro",
+    "name": "Waguri Kaoruko x rintaro",
+    "originalName": "Waguri Kaoruko x rintaro.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Waguri%20Kaoruko%20x%20rintaro.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Waguri%20Kaoruko%20x%20rintaro.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "kaoruko",
+      "waguri",
+      "rintaro",
+      "romance",
+      "cute",
+      "waifu"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Zangetsu_Bleach",
+    "name": "Zangetsu Bleach",
+    "originalName": "Zangetsu_Bleach.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Zangetsu_Bleach.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Zangetsu_Bleach.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "zangetsu",
+      "bleach",
+      "ichigo",
+      "sword",
+      "dark",
+      "power"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Zenitsu Demon Slayer",
+    "name": "Zenitsu Demon Slayer",
+    "originalName": "Zenitsu Demon Slayer.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Zenitsu%20Demon%20Slayer.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Zenitsu%20Demon%20Slayer.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "zenitsu",
+      "demon slayer",
+      "kimetsu no yaiba",
+      "thunder",
+      "action",
+      "yellow"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Anya vs Gojo",
+    "name": "Anya vs Gojo",
+    "originalName": "Anya vs Gojo.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Anya%20vs%20Gojo.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Anya%20vs%20Gojo.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "anya",
+      "gojo",
+      "spy family",
+      "jjk",
+      "crossover",
+      "cute",
+      "funny"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/berserk",
+    "name": "berserk",
+    "originalName": "berserk.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/berserk.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/berserk.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "berserk",
+      "guts",
+      "dark",
+      "medieval",
+      "sword",
+      "intense"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Bleach Ichigo Vs Ulquiorra",
+    "name": "Bleach Ichigo Vs Ulquiorra",
+    "originalName": "Bleach Ichigo Vs Ulquiorra.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Bleach%20Ichigo%20Vs%20Ulquiorra.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Bleach%20Ichigo%20Vs%20Ulquiorra.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "bleach",
+      "ichigo",
+      "ulquiorra",
+      "battle",
+      "hollow",
+      "epic",
+      "action"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/bleach rukia",
+    "name": "bleach rukia",
+    "originalName": "bleach rukia.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/bleach%20rukia.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/bleach%20rukia.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "bleach",
+      "rukia",
+      "soul reaper",
+      "waifu",
+      "ice"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/chainsaw man makima",
+    "name": "chainsaw man makima",
+    "originalName": "chainsaw man makima.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/chainsaw%20man%20makima.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/chainsaw%20man%20makima.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "makima",
+      "chainsaw man",
+      "csm",
+      "waifu",
+      "control devil",
+      "villain"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Deku vs shigaraki",
+    "name": "Deku vs shigaraki",
+    "originalName": "Deku vs shigaraki.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Deku%20vs%20shigaraki.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Deku%20vs%20shigaraki.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "deku",
+      "shigaraki",
+      "my hero academia",
+      "mha",
+      "battle",
+      "hero",
+      "villain"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/girl ame 13",
+    "name": "girl ame 13",
+    "originalName": "girl ame 13.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/girl%20ame%2013.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/girl%20ame%2013.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "girl",
+      "anime",
+      "aesthetic",
+      "rain",
+      "lofi",
+      "chill"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Gojo vs Sukuna JJK",
+    "name": "Gojo vs Sukuna JJK",
+    "originalName": "Gojo vs Sukuna JJK.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Gojo%20vs%20Sukuna%20JJK.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Gojo%20vs%20Sukuna%20JJK.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "gojo",
+      "sukuna",
+      "jjk",
+      "jujutsu kaisen",
+      "battle",
+      "action",
+      "epic"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/naruto vs sasuke",
+    "name": "naruto vs sasuke",
+    "originalName": "naruto vs sasuke.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/naruto%20vs%20sasuke.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/naruto%20vs%20sasuke.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "naruto",
+      "sasuke",
+      "naruto shippuden",
+      "battle",
+      "rivalry",
+      "ninja",
+      "action"
+    ]
+  },
+  {
+    "id": "anime_backgrounds/Water 7 Arc One Piece",
+    "name": "Water 7 Arc One Piece",
+    "originalName": "Water 7 Arc One Piece.mp4",
+    "videoUrl": "https://res.cloudinary.com/dupsivppy/video/upload/f_auto,q_auto/v1/anime_backgrounds/Water%207%20Arc%20One%20Piece.mp4?_a=BAMAOGfm0",
+    "thumbnailUrl": "https://res.cloudinary.com/dupsivppy/video/upload/c_scale,w_300/v1/anime_backgrounds/Water%207%20Arc%20One%20Piece.jpg?_a=BAMAOGfm0",
+    "tags": [
+      "one piece",
+      "water 7",
+      "luffy",
+      "pirate",
+      "emotional",
+      "arc"
+    ]
+  }
+]

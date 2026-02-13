@@ -1,0 +1,1340 @@
+project name EDIT-CHATBOT
+
+these are the models files 
+Conversation.js:
+import mongoose from 'mongoose';
+
+const ConversationSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
+    },
+    title: {
+        type: String,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+export default mongoose.model('Conversation', ConversationSchema);
+
+Message.js:
+import mongoose from 'mongoose';
+
+const MessageSchema = new mongoose.Schema({
+    conversationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Conversation',
+        required: true,
+        index: true
+    },
+    sender: {
+        type: String,
+        enum: ['user', 'ai'],
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    feedback: {
+        type: String,
+        enum: ['liked', 'disliked', null],
+        default: null
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+export default mongoose.model('Message', MessageSchema);
+
+User.js:
+import mongoose from 'mongoose';
+
+const UserSchema = new mongoose.Schema({
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    profilePicture: {
+        type: String
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+export default mongoose.model('User', UserSchema);
+
+
+these are the route files:
+admin.js:
+import express from 'express';
+import { verifyToken, requireAdmin } from '../middleware/auth.js';
+import User from '../models/User.js';
+import Conversation from '../models/Conversation.js';
+import Message from '../models/Message.js';
+
+const router = express.Router();
+
+// Get admin stats
+router.get('/stats', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const userCount = await User.countDocuments();
+        const conversationCount = await Conversation.countDocuments();
+        const messageCount = await Message.countDocuments();
+        const activeUsers = await User.find({ lastActive: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }).countDocuments();
+
+        res.json({
+            userCount,
+            conversationCount,
+            messageCount,
+            activeUsers
+        });
+    } catch (error) {
+        console.error('Admin stats error:', error);
+        res.status(500).json({ error: 'Failed to get admin stats' });
+    }
+});
+
+// Get all users
+router.get('/users', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const users = await User.find().sort({ createdAt: -1 }).select('-googleId');
+        res.json(users);
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({ error: 'Failed to get users' });
+    }
+});
+
+// Delete user
+router.delete('/users/:id', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        await Conversation.deleteMany({ userId: user._id });
+        res.json({ message: 'User and their data deleted successfully' });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
+// Get all conversations
+router.get('/conversations', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const conversations = await Conversation.find()
+            .populate('userId', 'name email profilePicture')
+            .sort({ createdAt: -1 });
+        res.json(conversations);
+    } catch (error) {
+        console.error('Get conversations error:', error);
+        res.status(500).json({ error: 'Failed to get conversations' });
+    }
+});
+
+// Delete conversation
+router.delete('/conversations/:id', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const conversation = await Conversation.findByIdAndDelete(req.params.id);
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversation not found' });
+        }
+        await Message.deleteMany({ conversationId: conversation._id });
+        res.json({ message: 'Conversation and messages deleted successfully' });
+    } catch (error) {
+        console.error('Delete conversation error:', error);
+        res.status(500).json({ error: 'Failed to delete conversation' });
+    }
+});
+
+// Get all messages
+router.get('/messages', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const messages = await Message.find()
+            .populate('conversationId', 'title userId')
+            .sort({ createdAt: -1 });
+        res.json(messages);
+    } catch (error) {
+        console.error('Get messages error:', error);
+        res.status(500).json({ error: 'Failed to get messages' });
+    }
+});
+
+// Get rate limit status
+router.get('/rate-limit', verifyToken, requireAdmin, (req, res) => {
+    res.json({
+        limit: 100,
+        window: '24 hours'
+    });
+});
+
+// Update user role
+router.put('/users/:id/role', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const { role } = req.body;
+        const user = await User.findByIdAndUpdate(req.params.id, { role, isAdmin: role === 'admin' }, { new: true });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Update role error:', error);
+        res.status(500).json({ error: 'Failed to update role' });
+    }
+});
+
+export default router;
+
+conversations.js:
+import express from 'express';
+import { verifyToken } from '../middleware/auth.js';
+import Conversation from '../models/Conversation.js';
+import Message from '../models/Message.js';
+
+const router = express.Router();
+
+// Get user's conversations
+router.get('/', verifyToken, async (req, res) => {
+    try {
+        const conversations = await Conversation.find({ userId: req.user.userId })
+            .sort({ createdAt: -1 });
+        res.json(conversations);
+    } catch (error) {
+        console.error('Get conversations error:', error);
+        res.status(500).json({ error: 'Failed to get conversations' });
+    }
+});
+
+// Create new conversation
+router.post('/', verifyToken, async (req, res) => {
+    try {
+        const { title } = req.body;
+        const conversation = await Conversation.create({
+            userId: req.user.userId,
+            title: title || 'New Conversation'
+        });
+        res.json(conversation);
+    } catch (error) {
+        console.error('Create conversation error:', error);
+        res.status(500).json({ error: 'Failed to create conversation' });
+    }
+});
+
+// Delete conversation
+router.delete('/:id', verifyToken, async (req, res) => {
+    try {
+        const conversation = await Conversation.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.userId
+        });
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversation not found' });
+        }
+        await Message.deleteMany({ conversationId: conversation._id });
+        res.json({ message: 'Conversation deleted successfully' });
+    } catch (error) {
+        console.error('Delete conversation error:', error);
+        res.status(500).json({ error: 'Failed to delete conversation' });
+    }
+});
+
+export default router;
+
+messages.js:
+import express from 'express';
+import { verifyToken } from '../middleware/auth.js';
+import Message from '../models/Message.js';
+
+const router = express.Router();
+
+// Get messages for a conversation
+router.get('/:conversationId', verifyToken, async (req, res) => {
+    try {
+        const messages = await Message.find({ conversationId: req.params.conversationId })
+            .sort({ createdAt: 1 });
+        res.json(messages);
+    } catch (error) {
+        console.error('Get messages error:', error);
+        res.status(500).json({ error: 'Failed to get messages' });
+    }
+});
+
+// Send message
+router.post('/', verifyToken, async (req, res) => {
+    try {
+        const { conversationId, content } = req.body;
+        const message = await Message.create({
+            conversationId,
+            sender: 'user',
+            content
+        });
+        res.json(message);
+    } catch (error) {
+        console.error('Send message error:', error);
+        res.status(500).json({ error: 'Failed to send message' });
+    }
+});
+
+// Add feedback to message
+router.post('/:id/feedback',
+
+conversations.js:
+import express from 'express';
+import Conversation from '../models/Conversation.js';
+import Message from '../models/Message.js';
+
+const router = express.Router();
+
+// Create a new conversation
+router.post('/', async (req, res) => {
+    try {
+        const { userId, title } = req.body;
+
+        if (!userId || !title) {
+            return res.status(400).json({ error: 'userId and title are required' });
+        }
+
+        const conversation = await Conversation.create({ userId, title });
+        res.status(201).json(conversation);
+    } catch (err) {
+        console.error('Error creating conversation:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get all conversations for a user
+router.get('/:userId', async (req, res) => {
+    try {
+        const conversations = await Conversation
+            .find({ userId: req.params.userId })
+            .sort({ createdAt: -1 });
+
+        res.json(conversations);
+    } catch (err) {
+        console.error('Error fetching conversations:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete a conversation and all its messages
+router.delete('/:id', async (req, res) => {
+    try {
+        const conversationId = req.params.id;
+
+        // Delete all messages in this conversation
+        await Message.deleteMany({ conversationId });
+
+        // Delete the conversation
+        const conversation = await Conversation.findByIdAndDelete(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversation not found' });
+        }
+
+        res.json({ message: 'Conversation deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting conversation:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+export default router;
+
+messages.js:
+import express from 'express';
+import Message from '../models/Message.js';
+
+const router = express.Router();
+
+// Get all messages for a conversation
+router.get('/:conversationId', async (req, res) => {
+    try {
+        const messages = await Message
+            .find({ conversationId: req.params.conversationId })
+            .sort({ createdAt: 1 });
+
+        res.json(messages);
+    } catch (err) {
+        console.error('Error fetching messages:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Add feedback to a message
+router.post('/:id/feedback', async (req, res) => {
+    try {
+        const { feedback } = req.body;
+
+        if (!['liked', 'disliked'].includes(feedback)) {
+            return res.status(400).json({ error: 'Invalid feedback type' });
+        }
+
+        const message = await Message.findByIdAndUpdate(
+            req.params.id,
+            { feedback },
+            { new: true }
+        );
+
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        res.json(message);
+    } catch (err) {
+        console.error('Error adding feedback:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+export default router;
+
+
+app.jsx:
+
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import BackgroundVideo from './components/BackgroundVideo'; // No VIDEO_COUNT needed
+import Sidebar from './components/Sidebar';
+import MessageList from './components/MessageList';
+import InputArea from './components/InputArea';
+import LandingPage from './components/LandingPage';
+import AdminDashboard from './components/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import BackgroundGallery from './components/BackgroundGallery'; // Import Gallery
+import { useChat } from './hooks/useChat';
+import { useAuth } from './contexts/AuthContext';
+
+function ChatApp() {
+  const { user, isAuthenticated, loading } = useAuth();
+  const {
+    messages,
+    input,
+    setInput,
+    sendMessage,
+    isLoading,
+    tokensUsed,
+    totalTokens,
+    isSessionExhausted,
+    resetSession,
+    conversations,
+    currentConversationId,
+    selectConversation,
+    deleteConversation,
+    updateFeedback,
+    startNewChat
+  } = useChat(user, null);
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false); // Gallery Modal state
+  const hasStarted = messages.length > 1;
+
+  // Background State Management
+  const [currentBackground, setCurrentBackground] = useState(null);
+  const [likedBackgrounds, setLikedBackgrounds] = useState([]);
+  const [shuffleEnabled, setShuffleEnabled] = useState(false);
+  const [availableVideos, setAvailableVideos] = useState([]);
+
+  // Load saved preferences on mount
+  useEffect(() => {
+    const savedBackground = localStorage.getItem('selectedBackground');
+    const savedLiked = JSON.parse(localStorage.getItem('likedBackgrounds') || '[]');
+    const savedShuffle = localStorage.getItem('shuffleEnabled') === 'true';
+
+    if (savedBackground) {
+      setCurrentBackground(savedBackground);
+    } else {
+      import('./videos.json').then(module => {
+        const videos = module.default || module;
+        if (videos.length > 0 && !savedBackground) {
+          setCurrentBackground(videos[0].videoUrl);
+        }
+      }).catch(err => console.log("Videos not loaded yet"));
+    }
+
+    if (savedLiked) {
+      setLikedBackgrounds(savedLiked);
+    }
+
+    setShuffleEnabled(savedShuffle);
+
+    // Load videos for shuffle
+    import('./videos.json').then(module => {
+      setAvailableVideos(module.default || module);
+    });
+  }, []);
+
+  // Auto-rotate backgrounds when shuffle is enabled
+  useEffect(() => {
+    if (!shuffleEnabled || availableVideos.length === 0) return;
+
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * availableVideos.length);
+      const randomVideo = availableVideos[randomIndex];
+      setCurrentBackground(randomVideo.videoUrl);
+      localStorage.setItem('selectedBackground', randomVideo.videoUrl);
+    }, 30000); // Change every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [shuffleEnabled, availableVideos]);
+
+  // Handle shuffle toggle
+  const handleShuffleToggle = (enabled) => {
+    setShuffleEnabled(enabled);
+    localStorage.setItem('shuffleEnabled', enabled.toString());
+  };
+
+  // Update background handler
+  const handleSelectBackground = (url, save = false) => {
+    setCurrentBackground(url);
+    if (save) {
+      localStorage.setItem('selectedBackground', url);
+    }
+  };
+
+  // Toggle Like handler
+  const handleToggleLike = (url) => {
+    let newLiked;
+    if (likedBackgrounds.includes(url)) {
+      newLiked = likedBackgrounds.filter(l => l !== url);
+    } else {
+      newLiked = [...likedBackgrounds, url];
+    }
+    setLikedBackgrounds(newLiked);
+    localStorage.setItem('likedBackgrounds', JSON.stringify(newLiked));
+  };
+
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#0f0c29',
+        color: '#00fff5',
+        fontSize: '18px',
+        fontFamily: '"Outfit", sans-serif'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  // Redirect to landing page if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/landing" replace />;
+  }
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      background: '#0f0c29',
+      fontFamily: '"Outfit", sans-serif'
+    }}>
+      {/* Video Background */}
+      <BackgroundVideo videoUrl={currentBackground} />
+
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        resetSession={resetSession}
+        onChangeBackground={() => {
+          setSidebarOpen(false); // Close sidebar
+          setGalleryOpen(true); // Open gallery
+        }}
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onSelectConversation={selectConversation}
+        onDeleteConversation={deleteConversation}
+        onNewChat={startNewChat}
+      />
+
+      {/* Background Gallery Modal */}
+      <BackgroundGallery
+        isOpen={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        onSelectBackground={handleSelectBackground}
+        currentBackground={currentBackground}
+        likedBackgrounds={likedBackgrounds}
+        onToggleLike={handleToggleLike}
+        shuffleEnabled={shuffleEnabled}
+        onShuffleToggle={handleShuffleToggle}
+      />
+
+      {/* Floating Header Elements */}
+      <AnimatePresence>
+        {!sidebarOpen && (
+          <>
+            {/* Floating Menu Button - Top Left */}
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setSidebarOpen(true)}
+              style={{
+                position: 'fixed',
+                top: '20px',
+                left: '20px',
+                zIndex: 100,
+                padding: '14px',
+                background: 'rgba(0, 0, 0, 0.6)',
+                backdropFilter: 'blur(15px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                color: '#00fff5',
+                transition: 'all 0.3s',
+                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 255, 245, 0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+                e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+              }}
+            >
+              <Menu size={24} />
+            </motion.button>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        {/* Chat Area */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          paddingTop: hasStarted ? '60px' : '0',
+          overflow: 'hidden',
+          minHeight: 0
+        }}>
+          {/* Messages */}
+          {hasStarted && (
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              minHeight: 0
+            }}>
+              <MessageList messages={messages} onUpdateFeedback={updateFeedback} />
+            </div>
+          )}
+
+          {/* Input Area */}
+          <InputArea
+            input={input}
+            setInput={setInput}
+            sendMessage={sendMessage}
+            isLoading={isLoading}
+            isSessionExhausted={isSessionExhausted}
+            tokensUsed={tokensUsed}
+            totalTokens={totalTokens}
+            hasStarted={hasStarted}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/" element={<ChatApp />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+
+index.js:
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
+import { handleChat } from './openai.js';
+import connectDB from './config/db.js';
+import conversationsRouter from './routes/conversations.js';
+import messagesRouter from './routes/messages.js';
+import authRouter from './routes/auth.js';
+import adminRouter from './routes/admin.js';
+
+dotenv.config();
+
+// Connect to MongoDB
+connectDB();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow localhost
+    if (origin.includes('localhost')) return callback(null, true);
+
+    // Allow dev tunnels (inc1.devtunnels.ms)
+    if (origin.includes('devtunnels.ms')) return callback(null, true);
+
+    // Reject other origins
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json());
+
+// In-memory session store
+// { [sessionId]: { history: [], tokensUsed: 0, lastAccess: Date } }
+global.sessions = {};
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/conversations', conversationsRouter);
+app.use('/api/messages', messagesRouter);
+app.use('/api/admin', adminRouter);
+
+// Chat endpoint
+app.post('/chat', async (req, res) => {
+  const { session_id, message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  // Create or retrieve session
+  const validSessionId = session_id || uuidv4();
+  if (!global.sessions[validSessionId]) {
+    global.sessions[validSessionId] = {
+      history: [],
+      tokensUsed: 0,
+      lastAccess: new Date()
+    };
+  }
+
+  const session = global.sessions[validSessionId];
+  session.lastAccess = new Date();
+
+  // Check limits
+  if (session.tokensUsed >= 2000) {
+    return res.status(403).json({
+      error: "SESSION_LIMIT_REACHED",
+      message: "Session token limit reached. Please reset after 24 hours.",
+      session_exhausted: true,
+      tokens_used: session.tokensUsed,
+      total_tokens: 2000
+    });
+  }
+
+  try {
+    const response = await handleChat(validSessionId, message);
+    res.json({
+      ...response,
+      session_id: validSessionId // Return ID in case client needs it
+    });
+  } catch (error) {
+    console.error('Chat error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+
+frontend file hooks/useChat.js:
+import { useState, useEffect, useRef } from 'react';
+
+const API_URL = 'http://localhost:3000/chat';
+// const API_URL = 'https://mwjm7x65-3000.inc1.devtunnels.ms/chat';
+const API_BASE = API_URL.replace('/chat', '');
+
+export function useChat(user, token) {
+    const [messages, setMessages] = useState([
+        { role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }
+    ]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
+    const [tokensUsed, setTokensUsed] = useState(0);
+    const [totalTokens, setTotalTokens] = useState(2000);
+    const [isSessionExhausted, setIsSessionExhausted] = useState(false);
+    const [historyOpen, setHistoryOpen] = useState(false); // Sidebar toggle
+
+    // Conversation management state
+    const [conversations, setConversations] = useState([]);
+    const [currentConversationId, setCurrentConversationId] = useState(null);
+
+    // Use authenticated user ID
+    const userId = user?.id;
+
+    // Load session from local storage on mount
+    useEffect(() => {
+        const storedSessionId = localStorage.getItem('anime_chat_session_id');
+        if (storedSessionId) {
+            setSessionId(storedSessionId);
+        }
+
+        // Load conversations only if user is authenticated
+        if (userId) {
+            fetchConversations();
+        }
+    }, [userId]);
+
+    // Fetch all conversations for the user
+    const fetchConversations = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/conversations/${userId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setConversations(data);
+            }
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+        }
+    };
+
+    // Create a new conversation
+    const createConversation = async (title) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/conversations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, title })
+            });
+
+            if (res.ok) {
+                const newConversation = await res.json();
+                setConversations(prev => [newConversation, ...prev]);
+                setCurrentConversationId(newConversation._id);
+                return newConversation._id;
+            }
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+        }
+        return null;
+    };
+
+    // Select a conversation and load its messages
+    const selectConversation = async (conversationId) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/messages/${conversationId}`);
+            if (res.ok) {
+                const messagesData = await res.json();
+                // Convert MongoDB messages to chat format
+                const chatMessages = messagesData.map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'assistant',
+                    content: msg.content
+                }));
+
+                setMessages(chatMessages.length > 0 ? chatMessages : [
+                    { role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }
+                ]);
+                setCurrentConversationId(conversationId);
+            }
+        } catch (error) {
+            console.error('Error loading conversation:', error);
+        }
+    };
+
+    // Delete a conversation
+    const deleteConversation = async (conversationId) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/conversations/${conversationId}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                setConversations(prev => prev.filter(c => c._id !== conversationId));
+
+                // If we deleted the current conversation, reset
+                if (conversationId === currentConversationId) {
+                    setCurrentConversationId(null);
+                    setMessages([{ role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }]);
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting conversation:', error);
+        }
+    };
+
+    // Save a message to the database
+    const saveMessage = async (conversationId, sender, content) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversationId, sender, content })
+            });
+
+            if (res.ok) {
+                const savedMessage = await res.json();
+                return savedMessage; // Return the saved message with _id
+            }
+        } catch (error) {
+            console.error('Error saving message:', error);
+        }
+        return null;
+    };
+
+    // Update message feedback (like/dislike)
+    const updateFeedback = async (messageId, feedback) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/messages/${messageId}/feedback`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ feedback })
+            });
+
+            if (res.ok) {
+                // Update local message state
+                setMessages(prev => prev.map(msg =>
+                    msg._id === messageId ? { ...msg, feedback } : msg
+                ));
+            }
+        } catch (error) {
+            console.error('Error updating feedback:', error);
+        }
+    };
+
+    // Start a new chat
+    const startNewChat = () => {
+        setCurrentConversationId(null);
+        setMessages([{ role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }]);
+        setTokensUsed(0);
+        setIsSessionExhausted(false);
+    };
+
+    const sendMessage = async (e) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading || isSessionExhausted) return;
+
+        const userMsg = input.trim();
+        setInput('');
+
+        // Create a conversation if this is the first message
+        let conversationId = currentConversationId;
+        if (!conversationId && messages.length <= 1) {
+            // Generate title from first message (truncate if too long)
+            const title = userMsg.length > 50 ? userMsg.substring(0, 47) + '...' : userMsg;
+            conversationId = await createConversation(title);
+        }
+
+        // Optimistic update
+        setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+        setIsLoading(true);
+
+        // Save user message to database
+        if (conversationId) {
+            await saveMessage(conversationId, 'user', userMsg);
+        }
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    message: userMsg
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.session_id && !sessionId) {
+                setSessionId(data.session_id);
+                localStorage.setItem('anime_chat_session_id', data.session_id);
+            }
+
+            if (data.error === "SESSION_LIMIT_REACHED") {
+                setIsSessionExhausted(true);
+                setTokensUsed(data.tokens_used);
+                const errorMsg = { role: 'assistant', content: data.message, isError: true };
+                setMessages(prev => [...prev, errorMsg]);
+
+                // Save error message to database
+                if (conversationId) {
+                    await saveMessage(conversationId, 'bot', data.message);
+                }
+            } else if (data.reply) {
+                setTokensUsed(data.tokens_used);
+                setTotalTokens(data.total_tokens);
+                setIsSessionExhausted(data.session_exhausted);
+
+                // Save bot reply to database and get the message ID
+                if (conversationId) {
+                    const savedMsg = await saveMessage(conversationId, 'bot', data.reply);
+                    const botMsg = {
+                        role: 'assistant',
+                        content: data.reply,
+                        _id: savedMsg?._id,
+                        feedback: savedMsg?.feedback || 'none'
+                    };
+                    setMessages(prev => [...prev, botMsg]);
+                } else {
+                    // No conversation yet, just add message without ID
+                    const botMsg = { role: 'assistant', content: data.reply };
+                    setMessages(prev => [...prev, botMsg]);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            const errorMsg = { role: 'assistant', content: "Gomenasai! Something went wrong with the server.", isError: true };
+            setMessages(prev => [...prev, errorMsg]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const resetSession = () => {
+        localStorage.removeItem('anime_chat_session_id');
+        setSessionId(null);
+        setMessages([{ role: 'assistant', content: "Session reset! Let's start over." }]);
+        setTokensUsed(0);
+        setIsSessionExhausted(false);
+        setCurrentConversationId(null); // Start a new conversation
+    };
+
+    return {
+        messages,
+        input,
+        setInput,
+        sendMessage,
+        isLoading,
+        tokensUsed,
+        totalTokens,
+        isSessionExhausted,
+        historyOpen,
+        setHistoryOpen,
+        resetSession,
+        // Conversation management
+        conversations,
+        currentConversationId,
+        createConversation,
+        selectConversation,
+        deleteConversation,
+        fetchConversations,
+        // New features
+        updateFeedback,
+        startNewChat
+    };
+}
+
+frontend file inputArea.jsx:
+import React from 'react';
+import { Send, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export default function InputArea({ input, setInput, sendMessage, isLoading, isSessionExhausted, tokensUsed, totalTokens, hasStarted }) {
+    const progress = Math.min((tokensUsed / totalTokens) * 100, 100);
+    const isNearLimit = progress > 90;
+
+    // Hero Mode (before first message)
+    if (!hasStarted) {
+        return (
+            <div style={{
+                position: 'absolute',
+                top: '40%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '75%',
+                maxWidth: '550px',
+                zIndex: 20,
+                padding: '24px'
+            }}>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
+                    {/* Title - Anime Style */}
+                    <h1 style={{
+                        fontSize: '56px',
+                        fontWeight: '800',
+                        color: 'white',
+                        textAlign: 'center',
+                        marginBottom: '12px',
+                        letterSpacing: '0.2em',
+                        fontFamily: '"Orbitron", sans-serif',
+                        textTransform: 'uppercase',
+                        textShadow: '0 0 30px rgba(0, 255, 245, 0.4)'
+                    }}>
+                        <span style={{
+                            color: '#00fff5',
+                            textShadow: '0 0 40px rgba(0, 255, 245, 0.6), 0 0 80px rgba(0, 255, 245, 0.3)'
+                        }}>AI</span>NIME
+                    </h1>
+
+                    {/* Subtitle */}
+                    <p style={{
+                        fontSize: '16px',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        textAlign: 'center',
+                        marginBottom: '32px',
+                        fontWeight: '300',
+                        letterSpacing: '0.15em',
+                        fontFamily: '"Rajdhani", sans-serif',
+                        textTransform: 'uppercase'
+                    }}>
+                        Your anime & manga expert
+                    </p>
+
+                    {/* Search Input */}
+                    <form onSubmit={sendMessage} style={{ position: 'relative' }}>
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Ask about any anime..."
+                            disabled={isLoading || isSessionExhausted}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255, 255, 255, 0.15)',
+                                color: 'white',
+                                fontSize: '15px',
+                                fontFamily: '"Outfit", sans-serif',
+                                letterSpacing: '0.03em',
+                                borderRadius: '50px',
+                                padding: '18px 56px 18px 24px',
+                                outline: 'none',
+                                transition: 'all 0.3s',
+                                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)'
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = '#00fff5';
+                                e.target.style.boxShadow = '0 0 25px rgba(0, 255, 245, 0.2), inset 0 0 20px rgba(0, 255, 245, 0.05)';
+                                e.target.style.background = 'rgba(255, 255, 255, 0.12)';
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                                e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.2)';
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                            }}
+                            autoFocus
+                        />
+                        <button
+                            type="submit"
+                            disabled={!input.trim() || isLoading || isSessionExhausted}
+                            style={{
+                                position: 'absolute',
+                                right: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: input.trim() ? 'linear-gradient(135deg, #00fff5, #00cccc)' : 'rgba(255, 255, 255, 0.1)',
+                                color: input.trim() ? '#0f0c29' : 'rgba(255, 255, 255, 0.3)',
+                                padding: '12px',
+                                borderRadius: '50%',
+                                border: 'none',
+                                cursor: input.trim() ? 'pointer' : 'default',
+                                transition: 'all 0.3s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: input.trim() ? '0 0 20px rgba(0, 255, 245, 0.4)' : 'none'
+                            }}
+                        >
+                            <Send size={18} />
+                        </button>
+                    </form>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // Chat Mode - Fixed at bottom of viewport
+    return (
+        <div style={{
+            flexShrink: 0,
+            padding: '8px 0 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 100%)',
+            paddingTop: '8px'
+        }}>
+            {/* Token Counter */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '11px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontFamily: '"Rajdhani", monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                background: 'rgba(0, 0, 0, 0.5)',
+                backdropFilter: 'blur(10px)',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.08)'
+            }}>
+                <Zap size={11} color={isNearLimit ? '#ef4444' : '#00fff5'} />
+                <span>Tokens</span>
+                <div style={{
+                    width: '60px',
+                    height: '3px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '2px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        width: `${progress}%`,
+                        height: '100%',
+                        background: isNearLimit ? '#ef4444' : 'linear-gradient(90deg, #00fff5, #00cccc)',
+                        transition: 'width 0.5s',
+                        boxShadow: isNearLimit ? '0 0 10px #ef4444' : '0 0 10px rgba(0, 255, 245, 0.5)'
+                    }} />
+                </div>
+                <span style={{
+                    color: isNearLimit ? '#ef4444' : 'rgba(255, 255, 255, 0.7)',
+                    fontWeight: '600'
+                }}>
+                    {tokensUsed}/{totalTokens}
+                </span>
+            </div>
+
+            {/* Input - Fixed width */}
+            <form onSubmit={sendMessage} style={{
+                position: 'relative',
+                width: '75%',
+                maxWidth: '600px'
+            }}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Continue the conversation..."
+                    disabled={isLoading || isSessionExhausted}
+                    style={{
+                        width: '100%',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: 'white',
+                        fontSize: '14px',
+                        fontFamily: '"Outfit", sans-serif',
+                        letterSpacing: '0.03em',
+                        borderRadius: '50px',
+                        padding: '16px 56px 16px 24px',
+                        outline: 'none',
+                        transition: 'all 0.3s',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)'
+                    }}
+                    onFocus={(e) => {
+                        e.target.style.borderColor = '#00fff5';
+                        e.target.style.boxShadow = '0 0 25px rgba(0, 255, 245, 0.2)';
+                        e.target.style.background = 'rgba(0, 0, 0, 0.7)';
+                    }}
+                    onBlur={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                        e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.4)';
+                        e.target.style.background = 'rgba(0, 0, 0, 0.6)';
+                    }}
+                    autoFocus
+                />
+                <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading || isSessionExhausted}
+                    style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: input.trim() ? 'linear-gradient(135deg, #00fff5, #00cccc)' : 'rgba(255, 255, 255, 0.1)',
+                        color: input.trim() ? '#0f0c29' : 'rgba(255, 255, 255, 0.3)',
+                        padding: '12px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        cursor: input.trim() ? 'pointer' : 'default',
+                        transition: 'all 0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: input.trim() ? '0 0 15px rgba(0, 255, 245, 0.4)' : 'none'
+                    }}
+                >
+                    <Send size={16} />
+                </button>
+            </form>
+        </div>
+    );
+}

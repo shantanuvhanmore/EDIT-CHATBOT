@@ -42,7 +42,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         }}>AI</span>NIME
                     </h1>
 
-                    {/* Subtitle - Dramatic */}
+                    {/* Subtitle */}
                     <p style={{
                         fontSize: '16px',
                         color: 'rgba(255, 255, 255, 0.6)',
@@ -120,22 +120,19 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
         );
     }
 
-    // Chat Mode - Floating elements
+    // Chat Mode - Fixed at bottom of viewport
     return (
         <div style={{
-            position: 'absolute',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '75%',
-            maxWidth: '600px',
-            zIndex: 30,
+            flexShrink: 0,
+            padding: '8px 0 12px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px'
+            gap: '8px',
+            background: 'linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 100%)',
+            paddingTop: '8px'
         }}>
-            {/* Token Counter - Floating */}
+            {/* Token Counter */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -145,11 +142,11 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 fontFamily: '"Rajdhani", monospace',
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
-                background: 'rgba(0, 0, 0, 0.4)',
+                background: 'rgba(0, 0, 0, 0.5)',
                 backdropFilter: 'blur(10px)',
                 padding: '8px 16px',
                 borderRadius: '20px',
-                border: '1px solid rgba(255, 255, 255, 0.05)'
+                border: '1px solid rgba(255, 255, 255, 0.08)'
             }}>
                 <Zap size={11} color={isNearLimit ? '#ef4444' : '#00fff5'} />
                 <span>Tokens</span>
@@ -176,8 +173,12 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 </span>
             </div>
 
-            {/* Floating Input */}
-            <form onSubmit={sendMessage} style={{ position: 'relative', width: '100%' }}>
+            {/* Input - Fixed width */}
+            <form onSubmit={sendMessage} style={{
+                position: 'relative',
+                width: '75%',
+                maxWidth: '600px'
+            }}>
                 <input
                     type="text"
                     value={input}
@@ -186,9 +187,9 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                     disabled={isLoading || isSessionExhausted}
                     style={{
                         width: '100%',
-                        background: 'rgba(0, 0, 0, 0.5)',
+                        background: 'rgba(0, 0, 0, 0.6)',
                         backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
                         color: 'white',
                         fontSize: '14px',
                         fontFamily: '"Outfit", sans-serif',
@@ -197,17 +198,17 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         padding: '16px 56px 16px 24px',
                         outline: 'none',
                         transition: 'all 0.3s',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)'
                     }}
                     onFocus={(e) => {
                         e.target.style.borderColor = '#00fff5';
-                        e.target.style.boxShadow = '0 0 25px rgba(0, 255, 245, 0.15)';
-                        e.target.style.background = 'rgba(0, 0, 0, 0.6)';
+                        e.target.style.boxShadow = '0 0 25px rgba(0, 255, 245, 0.2)';
+                        e.target.style.background = 'rgba(0, 0, 0, 0.7)';
                     }}
                     onBlur={(e) => {
-                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                        e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.3)';
-                        e.target.style.background = 'rgba(0, 0, 0, 0.5)';
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                        e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.4)';
+                        e.target.style.background = 'rgba(0, 0, 0, 0.6)';
                     }}
                     autoFocus
                 />

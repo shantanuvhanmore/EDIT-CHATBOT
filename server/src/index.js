@@ -3,13 +3,38 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { handleChat } from './openai.js';
+import connectDB from './config/db.js';
+import conversationsRouter from './routes/conversations.js';
+import messagesRouter from './routes/messages.js';
+import authRouter from './routes/auth.js';
+import adminRouter from './routes/admin.js';
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow localhost
+    if (origin.includes('localhost')) return callback(null, true);
+
+    // Allow dev tunnels (inc1.devtunnels.ms)
+    if (origin.includes('devtunnels.ms')) return callback(null, true);
+
+    // Reject other origins
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // In-memory session store
@@ -20,6 +45,12 @@ global.sessions = {};
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
+
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/conversations', conversationsRouter);
+app.use('/api/messages', messagesRouter);
+app.use('/api/admin', adminRouter);
 
 // Chat endpoint
 app.post('/chat', async (req, res) => {
