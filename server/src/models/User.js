@@ -64,6 +64,17 @@ const UserSchema = new mongoose.Schema({
             type: Date
         }
     },
+    hasPendingTokenRequest: {
+        type: Boolean,
+        default: false
+    },
+    tokenRequestCount: {
+        type: Number,
+        default: 0
+    },
+    lastTokenRequestAt: {
+        type: Date
+    },
     lastActiveAt: {
         type: Date,
         default: Date.now

@@ -500,4 +500,109 @@ router.get('/users/:id/conversations', async (req, res) => {
     }
 });
 
+// ==================== TOKEN REQUEST ENDPOINTS ====================
+
+import TokenRequest from '../models/TokenRequest.js';
+
+// GET /token-requests - All token requests
+router.get('/token-requests', async (req, res) => {
+    try {
+        const { status } = req.query;
+        const filter = status ? { status } : {};
+
+        const requests = await TokenRequest.find(filter)
+            .populate('userId', 'name email profilePicture')
+            .populate('processedBy', 'name email')
+            .sort({ requestedAt: -1 });
+
+        res.json(requests);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get token requests' });
+    }
+});
+
+// PUT /token-requests/:id/approve - Approve request
+router.put('/token-requests/:id/approve', async (req, res) => {
+    try {
+        const { adminResponse } = req.body;
+
+        const request = await TokenRequest.findById(req.params.id);
+        if (!request) {
+            return res.status(404).json({ error: 'Request not found' });
+        }
+
+        if (request.status !== 'pending') {
+            return res.status(400).json({ error: 'Request already processed' });
+        }
+
+        // Reset user's rate limits
+        await User.findByIdAndUpdate(request.userId, {
+            'rateLimits.requestCount': 0,
+            'rateLimits.tokenUsage': 0,
+            'rateLimits.requestWindowStart': new Date(),
+            'rateLimits.tokenResetDate': new Date(Date.now() + 24 * 60 * 60 * 1000),
+            'rateLimits.isRateLimited': false,
+            hasPendingTokenRequest: false
+        });
+
+        // Update request
+        request.status = 'approved';
+        request.adminResponse = adminResponse;
+        request.processedBy = req.user.id;
+        request.processedAt = new Date();
+        await request.save();
+
+        res.json({ message: 'Request approved and user limits reset', request });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to approve request' });
+    }
+});
+
+// PUT /token-requests/:id/reject - Reject request
+router.put('/token-requests/:id/reject', async (req, res) => {
+    try {
+        const { adminResponse } = req.body;
+
+        const request = await TokenRequest.findById(req.params.id);
+        if (!request) {
+            return res.status(404).json({ error: 'Request not found' });
+        }
+
+        if (request.status !== 'pending') {
+            return res.status(400).json({ error: 'Request already processed' });
+        }
+
+        // Update user
+        await User.findByIdAndUpdate(request.userId, {
+            hasPendingTokenRequest: false
+        });
+
+        // Update request
+        request.status = 'rejected';
+        request.adminResponse = adminResponse;
+        request.processedBy = req.user.id;
+        request.processedAt = new Date();
+        await request.save();
+
+        res.json({ message: 'Request rejected', request });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to reject request' });
+    }
+});
+
+// GET /token-requests/stats - Request statistics
+router.get('/token-requests/stats', async (req, res) => {
+    try {
+        const [pending, approved, rejected] = await Promise.all([
+            TokenRequest.countDocuments({ status: 'pending' }),
+            TokenRequest.countDocuments({ status: 'approved' }),
+            TokenRequest.countDocuments({ status: 'rejected' })
+        ]);
+
+        res.json({ pending, approved, rejected, total: pending + approved + rejected });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get stats' });
+    }
+});
+
 export default router;

@@ -8,6 +8,7 @@ import conversationsRouter from './routes/conversations.js';
 import messagesRouter from './routes/messages.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/admin.js';
+import tokenRequestsRouter from './routes/tokenRequests.js';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/conversations', conversationsRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/token-requests', tokenRequestsRouter);
 
 // Chat endpoint
 app.post('/chat', async (req, res) => {
