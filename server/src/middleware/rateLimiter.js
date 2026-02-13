@@ -1,6 +1,8 @@
 import rateLimit from 'express-rate-limit';
 
-// In-memory store (use Redis in production)
+// Supervisor Instruction: Redis disabled for demo. Using memory store.
+console.log('✓ Using in-memory rate limiting (Demo Mode)');
+
 export const chatRateLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
     max: async (req) => {
@@ -8,8 +10,10 @@ export const chatRateLimiter = rateLimit({
         if (req.user.role === 'admin') return 1000;
         return 20; // authenticated users - 20 requests per day
     },
+    store: store, // Use Redis store if available
     keyGenerator: (req) => {
-        return req.user?.id || req.ip;
+        // Use userId for authenticated users, fall back to IP
+        return req.userId || req.ip;
     },
     handler: (req, res) => {
         res.status(429).json({

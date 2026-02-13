@@ -58,10 +58,15 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
 
                     {/* Search Input */}
                     <form onSubmit={sendMessage} style={{ position: 'relative' }}>
-                        <input
-                            type="text"
+                        <textarea
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    sendMessage(e);
+                                }
+                            }}
                             placeholder="Ask about any anime..."
                             disabled={isLoading || isSessionExhausted}
                             style={{
@@ -73,11 +78,15 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                                 fontSize: '15px',
                                 fontFamily: '"Outfit", sans-serif',
                                 letterSpacing: '0.03em',
-                                borderRadius: '50px',
+                                borderRadius: '24px',
                                 padding: '18px 56px 18px 24px',
                                 outline: 'none',
                                 transition: 'all 0.3s',
-                                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)'
+                                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
+                                resize: 'none',
+                                minHeight: '56px',
+                                maxHeight: '150px',
+                                overflowY: 'auto'
                             }}
                             onFocus={(e) => {
                                 e.target.style.borderColor = '#00fff5';
@@ -89,6 +98,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                                 e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.2)';
                                 e.target.style.background = 'rgba(255, 255, 255, 0.08)';
                             }}
+                            rows={1}
                             autoFocus
                         />
                         <button
@@ -173,16 +183,53 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 </span>
             </div>
 
+            {/* Request Tokens Button - Show when exhausted */}
+            {isSessionExhausted && (
+                <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('openTokenRequest'))}
+                    style={{
+                        background: 'linear-gradient(135deg, #00fff5, #00cccc)',
+                        color: '#0f0c29',
+                        padding: '10px 20px',
+                        borderRadius: '20px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        fontFamily: '"Outfit", sans-serif',
+                        boxShadow: '0 0 20px rgba(0, 255, 245, 0.4)',
+                        transition: 'all 0.3s',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 245, 0.6)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 245, 0.4)';
+                    }}
+                >
+                    Request More Tokens
+                </button>
+            )}
+
             {/* Input - Fixed width */}
             <form onSubmit={sendMessage} style={{
                 position: 'relative',
                 width: '75%',
                 maxWidth: '600px'
             }}>
-                <input
-                    type="text"
+                <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage(e);
+                        }
+                    }}
                     placeholder="Continue the conversation..."
                     disabled={isLoading || isSessionExhausted}
                     style={{
@@ -194,11 +241,15 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         fontSize: '14px',
                         fontFamily: '"Outfit", sans-serif',
                         letterSpacing: '0.03em',
-                        borderRadius: '50px',
+                        borderRadius: '24px',
                         padding: '16px 56px 16px 24px',
                         outline: 'none',
                         transition: 'all 0.3s',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)'
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)',
+                        resize: 'none',
+                        minHeight: '52px',
+                        maxHeight: '150px',
+                        overflowY: 'auto'
                     }}
                     onFocus={(e) => {
                         e.target.style.borderColor = '#00fff5';
@@ -210,6 +261,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         e.target.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.4)';
                         e.target.style.background = 'rgba(0, 0, 0, 0.6)';
                     }}
+                    rows={1}
                     autoFocus
                 />
                 <button

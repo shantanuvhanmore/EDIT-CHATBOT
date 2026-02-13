@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-const API_URL = 'http://localhost:3000/chat';
-// const API_URL = 'https://mwjm7x65-3000.inc1.devtunnels.ms/chat';
-const API_BASE = API_URL.replace('/chat', '');
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_URL = `${API_BASE}/chat`;
 
 export function useChat(user, token) {
     const [messages, setMessages] = useState([
@@ -30,9 +29,16 @@ export function useChat(user, token) {
             setSessionId(storedSessionId);
         }
 
-        // Load conversations only if user is authenticated
+        // Load conversations and rate limit status only if user is authenticated
         if (userId) {
             fetchConversations();
+            fetchRateLimitStatus();
+
+            // Restore last active conversation
+            const storedConversationId = localStorage.getItem('current_conversation_id');
+            if (storedConversationId) {
+                selectConversation(storedConversationId);
+            }
         }
     }, [userId]);
 
@@ -49,6 +55,23 @@ export function useChat(user, token) {
         }
     };
 
+    // Fetch current rate limit status
+    const fetchRateLimitStatus = async () => {
+        if (!userId) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/rate-limit-status/${userId}`);
+            if (res.ok) {
+                const status = await res.json();
+                setTokensUsed(status.tokens.used);
+                setTotalTokens(status.tokens.limit);
+                setIsSessionExhausted(status.tokens.used >= status.tokens.limit);
+            }
+        } catch (error) {
+            console.error('Error fetching rate limit status:', error);
+        }
+    };
+
     // Create a new conversation
     const createConversation = async (title) => {
         try {
@@ -62,6 +85,8 @@ export function useChat(user, token) {
                 const newConversation = await res.json();
                 setConversations(prev => [newConversation, ...prev]);
                 setCurrentConversationId(newConversation._id);
+                // Persist to localStorage
+                localStorage.setItem('current_conversation_id', newConversation._id);
                 return newConversation._id;
             }
         } catch (error) {
@@ -79,16 +104,22 @@ export function useChat(user, token) {
                 // Convert MongoDB messages to chat format
                 const chatMessages = messagesData.map(msg => ({
                     role: msg.sender === 'user' ? 'user' : 'assistant',
-                    content: msg.content
+                    content: msg.content,
+                    _id: msg._id,
+                    feedback: msg.feedback || 'none'
                 }));
 
                 setMessages(chatMessages.length > 0 ? chatMessages : [
                     { role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }
                 ]);
                 setCurrentConversationId(conversationId);
+                // Persist to localStorage
+                localStorage.setItem('current_conversation_id', conversationId);
             }
         } catch (error) {
             console.error('Error loading conversation:', error);
+            // If conversation not found, clear from localStorage
+            localStorage.removeItem('current_conversation_id');
         }
     };
 
@@ -106,6 +137,7 @@ export function useChat(user, token) {
                 if (conversationId === currentConversationId) {
                     setCurrentConversationId(null);
                     setMessages([{ role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }]);
+                    localStorage.removeItem('current_conversation_id');
                 }
             }
         } catch (error) {
@@ -158,6 +190,8 @@ export function useChat(user, token) {
         setMessages([{ role: 'assistant', content: "Welcome! I'm your anime expert. Ask me anything!" }]);
         setTokensUsed(0);
         setIsSessionExhausted(false);
+        // Clear persisted conversation
+        localStorage.removeItem('current_conversation_id');
     };
 
     const sendMessage = async (e) => {
@@ -190,7 +224,8 @@ export function useChat(user, token) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     session_id: sessionId,
-                    message: userMsg
+                    message: userMsg,
+                    userId: userId
                 })
             });
 
@@ -201,9 +236,10 @@ export function useChat(user, token) {
                 localStorage.setItem('anime_chat_session_id', data.session_id);
             }
 
-            if (data.error === "SESSION_LIMIT_REACHED") {
+            if (data.error === "TOKEN_LIMIT_EXCEEDED" || data.error === "SESSION_LIMIT_REACHED") {
                 setIsSessionExhausted(true);
                 setTokensUsed(data.tokens_used);
+                setTotalTokens(data.total_tokens);
                 const errorMsg = { role: 'assistant', content: data.message, isError: true };
                 setMessages(prev => [...prev, errorMsg]);
 

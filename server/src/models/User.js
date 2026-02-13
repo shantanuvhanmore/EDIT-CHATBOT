@@ -83,6 +83,20 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    preferences: {
+        selectedBackground: {
+            type: String,
+            default: null
+        },
+        likedBackgrounds: {
+            type: [String],
+            default: []
+        },
+        shuffleEnabled: {
+            type: Boolean,
+            default: false
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now

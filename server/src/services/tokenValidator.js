@@ -3,11 +3,11 @@ import User from '../models/User.js';
 const RATE_LIMITS = {
     user: {
         requests: 20,
-        tokens: 20000
+        tokens: 2000
     },
     admin: {
-        requests: 1000,
-        tokens: 1000000
+        requests: 100,
+        tokens: 10000
     }
 };
 
@@ -88,6 +88,12 @@ export async function trackTokenUsage(userId, tokensUsed) {
     const user = await User.findById(userId);
 
     if (!user) {
+        return;
+    }
+
+    // Validate tokensUsed is a valid number
+    if (typeof tokensUsed !== 'number' || isNaN(tokensUsed) || tokensUsed < 0) {
+        console.error(`Invalid tokensUsed value: ${tokensUsed}`);
         return;
     }
 

@@ -1,10 +1,12 @@
 import express from 'express';
 import Message from '../models/Message.js';
+import Conversation from '../models/Conversation.js';
+import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Save a new message
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     try {
         const { conversationId, sender, content } = req.body;
 
@@ -20,6 +22,16 @@ router.post('/', async (req, res) => {
             });
         }
 
+        // Verify the conversation belongs to the authenticated user
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversation not found' });
+        }
+
+        if (conversation.userId.toString() !== req.userId) {
+            return res.status(403).json({ error: 'Access denied: You can only add messages to your own conversations' });
+        }
+
         const message = await Message.create({ conversationId, sender, content });
         res.status(201).json(message);
     } catch (err) {
@@ -29,8 +41,18 @@ router.post('/', async (req, res) => {
 });
 
 // Get all messages for a conversation
-router.get('/:conversationId', async (req, res) => {
+router.get('/:conversationId', verifyToken, async (req, res) => {
     try {
+        // Verify the conversation belongs to the authenticated user
+        const conversation = await Conversation.findById(req.params.conversationId);
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversation not found' });
+        }
+
+        if (conversation.userId.toString() !== req.userId) {
+            return res.status(403).json({ error: 'Access denied: You can only view messages from your own conversations' });
+        }
+
         const messages = await Message
             .find({ conversationId: req.params.conversationId })
             .sort({ createdAt: 1 });
@@ -43,7 +65,7 @@ router.get('/:conversationId', async (req, res) => {
 });
 
 // Update message feedback
-router.patch('/:id/feedback', async (req, res) => {
+router.patch('/:id/feedback', verifyToken, async (req, res) => {
     try {
         const { feedback } = req.body;
 
@@ -53,15 +75,19 @@ router.patch('/:id/feedback', async (req, res) => {
             });
         }
 
-        const message = await Message.findByIdAndUpdate(
-            req.params.id,
-            { feedback },
-            { new: true }
-        );
-
+        // Find the message and verify ownership through conversation
+        const message = await Message.findById(req.params.id);
         if (!message) {
             return res.status(404).json({ error: 'Message not found' });
         }
+
+        const conversation = await Conversation.findById(message.conversationId);
+        if (!conversation || conversation.userId.toString() !== req.userId) {
+            return res.status(403).json({ error: 'Access denied: You can only update feedback on your own messages' });
+        }
+
+        message.feedback = feedback;
+        await message.save();
 
         res.json(message);
     } catch (err) {

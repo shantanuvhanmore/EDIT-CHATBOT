@@ -2,11 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Download, TrendingUp, Users, MessageSquare, ThumbsUp, ThumbsDown, Eye, Trash2, UserCog } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import TokenRequestsPanel from './TokenRequestsPanel';
 
 export default function AdminDashboard() {
     const { token } = useAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('analytics');
+
+    // Get initial tab from URL hash or default to 'analytics'
+    const getInitialTab = () => {
+        const hash = window.location.hash.replace('#', '');
+        return ['analytics', 'conversations', 'users', 'requests'].includes(hash) ? hash : 'analytics';
+    };
+
+    const [activeTab, setActiveTab] = useState(getInitialTab());
     const [loading, setLoading] = useState(false);
 
     // Analytics state
@@ -34,7 +42,13 @@ export default function AdminDashboard() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [userConversations, setUserConversations] = useState([]);
 
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+    // Update URL hash when tab changes
+    const handleTabChange = (tabId) => {
+        setActiveTab(tabId);
+        window.location.hash = tabId;
+    };
 
     useEffect(() => {
         if (activeTab === 'analytics') {
@@ -293,11 +307,12 @@ export default function AdminDashboard() {
                 {[
                     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
                     { id: 'conversations', label: 'Conversations', icon: MessageSquare },
-                    { id: 'users', label: 'Users', icon: Users }
+                    { id: 'users', label: 'Users', icon: Users },
+                    { id: 'requests', label: 'Token Requests', icon: ThumbsUp }
                 ].map(tab => (
                     <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => handleTabChange(tab.id)}
                         style={{
                             background: activeTab === tab.id ? 'rgba(0, 255, 245, 0.1)' : 'transparent',
                             border: activeTab === tab.id ? '1px solid rgba(0, 255, 245, 0.3)' : '1px solid transparent',
@@ -365,6 +380,9 @@ export default function AdminDashboard() {
                             onCloseUserView={() => setSelectedUser(null)}
                             onExport={() => exportData(users, 'users')}
                         />
+                    )}
+                    {activeTab === 'requests' && (
+                        <TokenRequestsPanel token={token} />
                     )}
                 </div>
             </div>

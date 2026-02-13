@@ -15,8 +15,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('auth_token'));
     const [loading, setLoading] = useState(true);
 
-    const API_BASE = 'http://localhost:3000';
-    // const API_BASE = 'https://mwjm7x65-3000.inc1.devtunnels.ms';
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 
 

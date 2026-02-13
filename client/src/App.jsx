@@ -11,6 +11,7 @@ import LandingPage from './components/LandingPage';
 import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import BackgroundGallery from './components/BackgroundGallery'; // Import Gallery
+import RequestTokensModal from './components/RequestTokensModal';
 import { useChat } from './hooks/useChat';
 import { useAuth } from './contexts/AuthContext';
 
@@ -36,6 +37,7 @@ function ChatApp() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false); // Gallery Modal state
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const hasStarted = messages.length > 1;
 
   // Background State Management
@@ -44,34 +46,106 @@ function ChatApp() {
   const [shuffleEnabled, setShuffleEnabled] = useState(false);
   const [availableVideos, setAvailableVideos] = useState([]);
 
+  // Listen for token request event
+  useEffect(() => {
+    const handleOpenRequest = () => setShowRequestModal(true);
+    window.addEventListener('openTokenRequest', handleOpenRequest);
+    return () => window.removeEventListener('openTokenRequest', handleOpenRequest);
+  }, []);
+
+  // Handle token request submission
+  const handleRequestTokens = async (reason) => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      const res = await fetch(`${API_BASE}/api/token-requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({ reason })
+      });
+
+      if (res.ok) {
+        alert('Token request submitted! Admin will review shortly.');
+        setShowRequestModal(false);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to submit request');
+      }
+    } catch (error) {
+      alert('Failed to submit token request');
+    }
+  };
+
   // Load saved preferences on mount
   useEffect(() => {
-    const savedBackground = localStorage.getItem('selectedBackground');
-    const savedLiked = JSON.parse(localStorage.getItem('likedBackgrounds') || '[]');
-    const savedShuffle = localStorage.getItem('shuffleEnabled') === 'true';
+    const loadPreferences = async () => {
+      if (isAuthenticated && token) {
+        try {
+          const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+          const res = await fetch(`${API_BASE}/api/preferences`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
 
-    if (savedBackground) {
-      setCurrentBackground(savedBackground);
-    } else {
-      import('./videos.json').then(module => {
-        const videos = module.default || module;
-        if (videos.length > 0 && !savedBackground) {
-          setCurrentBackground(videos[0].videoUrl);
+          if (res.ok) {
+            const prefs = await res.json();
+
+            if (prefs.selectedBackground) {
+              setCurrentBackground(prefs.selectedBackground);
+            } else {
+              // Load default background if no preference saved
+              import('./videos.json').then(module => {
+                const videos = module.default || module;
+                if (videos.length > 0) {
+                  setCurrentBackground(videos[0].videoUrl);
+                }
+              }).catch(err => console.log("Videos not loaded yet"));
+            }
+
+            if (prefs.likedBackgrounds) {
+              setLikedBackgrounds(prefs.likedBackgrounds);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading preferences:', error);
+          // Fallback to default background
+          import('./videos.json').then(module => {
+            const videos = module.default || module;
+            if (videos.length > 0) {
+              setCurrentBackground(videos[0].videoUrl);
+            }
+          }).catch(err => console.log("Videos not loaded yet"));
         }
-      }).catch(err => console.log("Videos not loaded yet"));
-    }
+      } else {
+        // For non-authenticated users, use localStorage as fallback
+        const savedBackground = localStorage.getItem('selectedBackground');
+        const savedLiked = JSON.parse(localStorage.getItem('likedBackgrounds') || '[]');
 
-    if (savedLiked) {
-      setLikedBackgrounds(savedLiked);
-    }
+        if (savedBackground) {
+          setCurrentBackground(savedBackground);
+        } else {
+          import('./videos.json').then(module => {
+            const videos = module.default || module;
+            if (videos.length > 0) {
+              setCurrentBackground(videos[0].videoUrl);
+            }
+          }).catch(err => console.log("Videos not loaded yet"));
+        }
 
-    setShuffleEnabled(savedShuffle);
+        setLikedBackgrounds(savedLiked);
+      }
+    };
+
+    loadPreferences();
 
     // Load videos for shuffle
     import('./videos.json').then(module => {
       setAvailableVideos(module.default || module);
     });
-  }, []);
+  }, [isAuthenticated, token]);
 
   // Auto-rotate backgrounds when shuffle is enabled
   useEffect(() => {
@@ -81,28 +155,57 @@ function ChatApp() {
       const randomIndex = Math.floor(Math.random() * availableVideos.length);
       const randomVideo = availableVideos[randomIndex];
       setCurrentBackground(randomVideo.videoUrl);
-      localStorage.setItem('selectedBackground', randomVideo.videoUrl);
+
+      // Save to database or localStorage
+      if (isAuthenticated && token) {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+        fetch(`${API_BASE}/api/preferences`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ selectedBackground: randomVideo.videoUrl })
+        }).catch(err => console.error('Error saving background:', err));
+      } else {
+        localStorage.setItem('selectedBackground', randomVideo.videoUrl);
+      }
     }, 30000); // Change every 30 seconds
 
     return () => clearInterval(interval);
-  }, [shuffleEnabled, availableVideos]);
+  }, [shuffleEnabled, availableVideos, isAuthenticated, token]);
 
   // Handle shuffle toggle
   const handleShuffleToggle = (enabled) => {
     setShuffleEnabled(enabled);
-    localStorage.setItem('shuffleEnabled', enabled.toString());
   };
 
   // Update background handler
-  const handleSelectBackground = (url, save = false) => {
+  const handleSelectBackground = async (url, save = false) => {
     setCurrentBackground(url);
     if (save) {
-      localStorage.setItem('selectedBackground', url);
+      if (isAuthenticated && token) {
+        try {
+          const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+          await fetch(`${API_BASE}/api/preferences`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ selectedBackground: url })
+          });
+        } catch (error) {
+          console.error('Error saving background preference:', error);
+        }
+      } else {
+        localStorage.setItem('selectedBackground', url);
+      }
     }
   };
 
   // Toggle Like handler
-  const handleToggleLike = (url) => {
+  const handleToggleLike = async (url) => {
     let newLiked;
     if (likedBackgrounds.includes(url)) {
       newLiked = likedBackgrounds.filter(l => l !== url);
@@ -110,7 +213,24 @@ function ChatApp() {
       newLiked = [...likedBackgrounds, url];
     }
     setLikedBackgrounds(newLiked);
-    localStorage.setItem('likedBackgrounds', JSON.stringify(newLiked));
+
+    if (isAuthenticated && token) {
+      try {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+        await fetch(`${API_BASE}/api/preferences`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ likedBackgrounds: newLiked })
+        });
+      } catch (error) {
+        console.error('Error saving liked backgrounds:', error);
+      }
+    } else {
+      localStorage.setItem('likedBackgrounds', JSON.stringify(newLiked));
+    }
   };
 
 
@@ -265,6 +385,13 @@ function ChatApp() {
           />
         </div>
       </div>
+
+      {/* Request Tokens Modal */}
+      <RequestTokensModal
+        isOpen={showRequestModal}
+        onClose={() => setShowRequestModal(false)}
+        onSubmit={handleRequestTokens}
+      />
     </div>
   );
 }

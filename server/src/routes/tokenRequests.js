@@ -23,8 +23,8 @@ router.post('/', verifyToken, async (req, res) => {
             requestedAt: { $gte: today }
         });
 
-        if (requestsToday >= 3) {
-            return res.status(429).json({ error: 'Maximum 3 token requests per day' });
+        if (requestsToday >= 5) {
+            return res.status(429).json({ error: 'Maximum 5 token requests per day' });
         }
 
         const tokenRequest = new TokenRequest({
@@ -74,10 +74,10 @@ router.get('/can-request', verifyToken, async (req, res) => {
         });
 
         res.json({
-            canRequest: !user.hasPendingTokenRequest && requestsToday < 3,
+            canRequest: !user.hasPendingTokenRequest && requestsToday < 30,
             hasPending: user.hasPendingTokenRequest,
             requestsToday,
-            maxRequestsPerDay: 3
+            maxRequestsPerDay: 30
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to check status' });
