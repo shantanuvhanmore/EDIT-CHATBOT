@@ -29,6 +29,49 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    rateLimits: {
+        requestCount: {
+            type: Number,
+            default: 0
+        },
+        requestWindowStart: {
+            type: Date,
+            default: Date.now
+        },
+        tokenUsage: {
+            type: Number,
+            default: 0
+        },
+        tokenResetDate: {
+            type: Date,
+            default: Date.now
+        },
+        lastRequestAt: {
+            type: Date
+        },
+        violationCount: {
+            type: Number,
+            default: 0
+        },
+        isBanned: {
+            type: Boolean,
+            default: false
+        },
+        banReason: {
+            type: String
+        },
+        banExpiresAt: {
+            type: Date
+        }
+    },
+    lastActiveAt: {
+        type: Date,
+        default: Date.now
+    },
+    lastLoginAt: {
+        type: Date,
+        default: Date.now
+    },
     createdAt: {
         type: Date,
         default: Date.now

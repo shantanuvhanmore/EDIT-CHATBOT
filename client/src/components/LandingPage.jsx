@@ -6,20 +6,7 @@ import BackgroundVideo from './BackgroundVideo';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LandingPage() {
-    const { loginAsGuest } = useAuth();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-
-    const handleGuestLogin = async () => {
-        setLoading(true);
-        const result = await loginAsGuest();
-        if (result.success) {
-            navigate('/');
-        } else {
-            alert('Guest login failed: ' + result.error);
-        }
-        setLoading(false);
-    };
 
     return (
         <div style={{
@@ -111,74 +98,16 @@ export default function LandingPage() {
                         letterSpacing: '0.1em',
                         textTransform: 'uppercase'
                     }}>
-                        Get Started
+                        Sign In with Google
                     </h2>
 
                     {/* Google Sign Up Button */}
                     <div style={{
                         display: 'flex',
-                        justifyContent: 'center',
-                        marginBottom: '16px'
+                        justifyContent: 'center'
                     }}>
                         <GoogleLoginButton />
                     </div>
-
-                    {/* Divider */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        margin: '20px 0'
-                    }}>
-                        <div style={{
-                            flex: 1,
-                            height: '1px',
-                            background: 'rgba(255, 255, 255, 0.1)'
-                        }} />
-                        <span style={{
-                            fontSize: '12px',
-                            color: 'rgba(255, 255, 255, 0.4)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.1em'
-                        }}>or</span>
-                        <div style={{
-                            flex: 1,
-                            height: '1px',
-                            background: 'rgba(255, 255, 255, 0.1)'
-                        }} />
-                    </div>
-
-                    {/* Guest Login Button */}
-                    <button
-                        onClick={handleGuestLogin}
-                        disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '12px 24px',
-                            background: 'transparent',
-                            border: '1px solid rgba(0, 255, 245, 0.3)',
-                            borderRadius: '8px',
-                            color: '#00fff5',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            transition: 'all 0.2s',
-                            opacity: loading ? 0.5 : 1,
-                            fontFamily: '"Outfit", sans-serif'
-                        }}
-                        onMouseEnter={(e) => {
-                            if (!loading) {
-                                e.currentTarget.style.background = 'rgba(0, 255, 245, 0.1)';
-                                e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.5)';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.3)';
-                        }}
-                    >
-                        {loading ? 'Loading...' : 'Continue as Guest'}
-                    </button>
 
                     <p style={{
                         fontSize: '11px',
@@ -186,7 +115,7 @@ export default function LandingPage() {
                         marginTop: '20px',
                         lineHeight: '1.4'
                     }}>
-                        By signing up, you agree to our Terms of Service and Privacy Policy
+                        By signing in, you agree to our Terms of Service and Privacy Policy
                     </p>
                 </motion.div>
 

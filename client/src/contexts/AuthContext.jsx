@@ -76,35 +76,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const loginAsGuest = async () => {
-        try {
-            const res = await fetch(`${API_BASE}/api/auth/guest`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setToken(data.token);
-                setUser(data.user);
-                localStorage.setItem('auth_token', data.token);
-                return { success: true };
-            } else {
-                const error = await res.json();
-                return { success: false, error: error.error };
-            }
-        } catch (error) {
-            console.error('Guest login error:', error);
-            return { success: false, error: 'Guest login failed' };
-        }
-    };
-
     const logout = () => {
         setUser(null);
         setToken(null);
         localStorage.removeItem('auth_token');
-        localStorage.removeItem('anime_chat_user_id'); // Clear old user ID
-        localStorage.removeItem('anime_chat_session_id');
     };
 
     const value = {
@@ -112,7 +87,6 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         login,
-        loginAsGuest,
         logout,
         isAuthenticated: !!user,
         isAdmin: user?.isAdmin || false
