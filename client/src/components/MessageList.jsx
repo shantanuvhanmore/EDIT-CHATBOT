@@ -72,8 +72,20 @@ function MarkdownContent({ content }) {
     );
 }
 
+// Responsive hook
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    return isMobile;
+}
+
 export default function MessageList({ messages, onUpdateFeedback }) {
     const bottomRef = useRef(null);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,15 +97,16 @@ export default function MessageList({ messages, onUpdateFeedback }) {
             height: '100%',
             overflowY: 'auto',
             overflowX: 'hidden',
-            padding: '12px 24px',
-            paddingLeft: '80px',
+            padding: isMobile ? '12px' : '12px 24px',
+            paddingLeft: isMobile ? '0' : '80px', // Remove left padding on mobile (sidebar covers)
             boxSizing: 'border-box'
         }}>
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '20px',
-                fontFamily: '"Outfit", "Inter", sans-serif'
+                gap: isMobile ? '16px' : '20px',
+                fontFamily: '"Outfit", "Inter", sans-serif',
+                paddingBottom: '20px' // Extra space at bottom
             }}>
                 <AnimatePresence>
                     {messages.map((msg, index) => {
@@ -101,6 +114,7 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                         const isAssistant = msg.role === 'assistant';
                         const shouldAnimate = isLastMessage && isAssistant;
                         const isUser = msg.role === 'user';
+                        const hasFeedback = isAssistant && !msg.isError && msg._id && onUpdateFeedback;
 
                         return (
                             <motion.div
@@ -110,16 +124,17 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                                 transition={{ duration: 0.3 }}
                                 style={{
                                     display: 'flex',
-                                    gap: '12px',
+                                    gap: isMobile ? '8px' : '12px',
                                     flexDirection: isUser ? 'row-reverse' : 'row',
-                                    alignItems: 'flex-start'
+                                    alignItems: 'flex-start',
+                                    marginBottom: (isMobile && hasFeedback) ? '25px' : '0' // Space for feedback buttons on mobile
                                 }}
                             >
                                 {/* Avatar */}
                                 <div style={{
                                     flexShrink: 0,
-                                    width: '40px',
-                                    height: '40px',
+                                    width: isMobile ? '32px' : '40px',
+                                    height: isMobile ? '32px' : '40px',
                                     borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -133,19 +148,19 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                                         : '0 0 25px rgba(0, 255, 245, 0.3)'
                                 }}>
                                     {isUser ? (
-                                        <User size={20} color="white" />
+                                        <User size={isMobile ? 16 : 20} color="white" />
                                     ) : (
-                                        <Bot size={20} color="#00fff5" />
+                                        <Bot size={isMobile ? 16 : 20} color="#00fff5" />
                                     )}
                                 </div>
 
                                 {/* Message Bubble */}
                                 <div style={{
-                                    maxWidth: '70%',
+                                    maxWidth: isMobile ? '85%' : '70%',
                                     position: 'relative',
-                                    padding: '16px 20px',
+                                    padding: isMobile ? '12px 16px' : '16px 20px',
                                     borderRadius: '20px',
-                                    fontSize: '15px',
+                                    fontSize: isMobile ? '14px' : '15px',
                                     lineHeight: '1.7',
                                     letterSpacing: '0.04em',
                                     color: msg.isError ? '#fca5a5' : 'white',
@@ -183,16 +198,18 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                                         }} />
                                     )}
 
-                                    {/* Like/Dislike Buttons - Floating on the right side */}
-                                    {isAssistant && !msg.isError && msg._id && onUpdateFeedback && (
+                                    {/* Like/Dislike Buttons */}
+                                    {hasFeedback && (
                                         <div style={{
                                             position: 'absolute',
-                                            right: '-50px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
+                                            right: isMobile ? '0' : '-50px',
+                                            top: isMobile ? 'auto' : '50%',
+                                            bottom: isMobile ? '-35px' : 'auto',
+                                            transform: isMobile ? 'none' : 'translateY(-50%)',
                                             display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '8px'
+                                            flexDirection: isMobile ? 'row' : 'column',
+                                            gap: '8px',
+                                            zIndex: 10
                                         }}>
                                             <button
                                                 onClick={() => {
@@ -203,19 +220,11 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                                                     background: 'transparent',
                                                     border: 'none',
                                                     cursor: 'pointer',
-                                                    fontSize: '24px',
+                                                    fontSize: isMobile ? '20px' : '24px',
                                                     transition: 'all 0.2s',
                                                     opacity: msg.feedback === 'liked' ? 1 : 0.5,
                                                     transform: msg.feedback === 'liked' ? 'scale(1.2)' : 'scale(1)',
                                                     padding: '4px'
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.transform = 'scale(1.3)';
-                                                    e.currentTarget.style.opacity = '1';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.transform = msg.feedback === 'liked' ? 'scale(1.2)' : 'scale(1)';
-                                                    e.currentTarget.style.opacity = msg.feedback === 'liked' ? '1' : '0.5';
                                                 }}
                                                 title="Like"
                                             >
@@ -230,19 +239,11 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                                                     background: 'transparent',
                                                     border: 'none',
                                                     cursor: 'pointer',
-                                                    fontSize: '24px',
+                                                    fontSize: isMobile ? '20px' : '24px',
                                                     transition: 'all 0.2s',
                                                     opacity: msg.feedback === 'disliked' ? 1 : 0.5,
                                                     transform: msg.feedback === 'disliked' ? 'scale(1.2)' : 'scale(1)',
                                                     padding: '4px'
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.transform = 'scale(1.3)';
-                                                    e.currentTarget.style.opacity = '1';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.transform = msg.feedback === 'disliked' ? 'scale(1.2)' : 'scale(1)';
-                                                    e.currentTarget.style.opacity = msg.feedback === 'disliked' ? '1' : '0.5';
                                                 }}
                                                 title="Report"
                                             >
