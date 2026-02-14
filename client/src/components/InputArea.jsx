@@ -1,3 +1,7 @@
+import React, { useState } from 'react';
+import { Send, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+
 // Responsive hook
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
