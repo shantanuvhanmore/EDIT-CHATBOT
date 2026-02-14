@@ -1,0 +1,13 @@
+{
+    "name": "edit-chatbot-root",
+    "version": "1.0.0",
+    "description": "Root entry point for Heroku deployment",
+    "engines": {
+        "node": "20.x"
+    },
+    "scripts": {
+        "start": "cd server && npm start",
+        "heroku-postbuild": "cd server && npm install"
+    },
+    "dependencies": {}
+}
