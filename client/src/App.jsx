@@ -33,7 +33,7 @@ function ChatApp() {
     deleteConversation,
     updateFeedback,
     startNewChat
-  } = useChat(user, null);
+  } = useChat(user, token);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false); // Gallery Modal state

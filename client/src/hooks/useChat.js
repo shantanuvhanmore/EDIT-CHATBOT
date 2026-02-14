@@ -45,7 +45,11 @@ export function useChat(user, token) {
     // Fetch all conversations for the user
     const fetchConversations = async () => {
         try {
-            const res = await fetch(`${API_BASE}/api/conversations/${userId}`);
+            const res = await fetch(`${API_BASE}/api/conversations/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setConversations(data);
@@ -60,7 +64,11 @@ export function useChat(user, token) {
         if (!userId) return;
 
         try {
-            const res = await fetch(`${API_BASE}/api/rate-limit-status/${userId}`);
+            const res = await fetch(`${API_BASE}/api/rate-limit-status/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (res.ok) {
                 const status = await res.json();
                 setTokensUsed(status.tokens.used);
@@ -77,7 +85,10 @@ export function useChat(user, token) {
         try {
             const res = await fetch(`${API_BASE}/api/conversations`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ userId, title })
             });
 
@@ -98,7 +109,11 @@ export function useChat(user, token) {
     // Select a conversation and load its messages
     const selectConversation = async (conversationId) => {
         try {
-            const res = await fetch(`${API_BASE}/api/messages/${conversationId}`);
+            const res = await fetch(`${API_BASE}/api/messages/${conversationId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (res.ok) {
                 const messagesData = await res.json();
                 // Convert MongoDB messages to chat format
@@ -127,7 +142,10 @@ export function useChat(user, token) {
     const deleteConversation = async (conversationId) => {
         try {
             const res = await fetch(`${API_BASE}/api/conversations/${conversationId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (res.ok) {
@@ -150,7 +168,10 @@ export function useChat(user, token) {
         try {
             const res = await fetch(`${API_BASE}/api/messages`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ conversationId, sender, content })
             });
 
@@ -169,7 +190,10 @@ export function useChat(user, token) {
         try {
             const res = await fetch(`${API_BASE}/api/messages/${messageId}/feedback`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ feedback })
             });
 
@@ -221,7 +245,10 @@ export function useChat(user, token) {
         try {
             const res = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     session_id: sessionId,
                     message: userMsg,

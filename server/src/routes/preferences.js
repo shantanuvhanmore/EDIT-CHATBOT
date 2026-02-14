@@ -5,7 +5,7 @@ import User from '../models/User.js';
 const router = express.Router();
 
 // Get user preferences
-router.get('/preferences', verifyToken, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
         if (!user) {
@@ -24,7 +24,7 @@ router.get('/preferences', verifyToken, async (req, res) => {
 });
 
 // Update user preferences
-router.patch('/preferences', verifyToken, async (req, res) => {
+router.patch('/', verifyToken, async (req, res) => {
     try {
         const { selectedBackground, likedBackgrounds, shuffleEnabled } = req.body;
 
