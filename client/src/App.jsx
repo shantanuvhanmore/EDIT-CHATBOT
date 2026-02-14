@@ -263,7 +263,7 @@ function ChatApp() {
       top: 0,
       left: 0,
       width: '100vw',
-      height: '100vh',
+      height: '100dvh',
       overflow: 'hidden',
       background: '#0f0c29',
       fontFamily: '"Outfit", sans-serif'

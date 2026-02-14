@@ -1,10 +1,18 @@
-import React from 'react';
-import { Send, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+// Responsive hook
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    React.useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    return isMobile;
+}
 
 export default function InputArea({ input, setInput, sendMessage, isLoading, isSessionExhausted, tokensUsed, totalTokens, hasStarted }) {
     const progress = Math.min((tokensUsed / totalTokens) * 100, 100);
     const isNearLimit = progress > 90;
+    const isMobile = useIsMobile();
 
     // Hero Mode (before first message)
     if (!hasStarted) {
@@ -14,7 +22,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 top: '40%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '75%',
+                width: isMobile ? '90%' : '75%',
                 maxWidth: '550px',
                 zIndex: 20,
                 padding: '24px'
@@ -26,7 +34,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 >
                     {/* Title - Anime Style */}
                     <h1 style={{
-                        fontSize: '56px',
+                        fontSize: isMobile ? '40px' : '56px',
                         fontWeight: '800',
                         color: 'white',
                         textAlign: 'center',
@@ -44,7 +52,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
 
                     {/* Subtitle */}
                     <p style={{
-                        fontSize: '16px',
+                        fontSize: isMobile ? '14px' : '16px',
                         color: 'rgba(255, 255, 255, 0.6)',
                         textAlign: 'center',
                         marginBottom: '32px',
@@ -135,11 +143,12 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
         <div style={{
             flexShrink: 0,
             padding: '8px 0 12px',
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', // Safe area for mobile
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '8px',
-            background: 'linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%)', // Darker background for visibility
             paddingTop: '8px'
         }}>
             {/* Token Counter */}
@@ -154,14 +163,14 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                 letterSpacing: '0.15em',
                 background: 'rgba(0, 0, 0, 0.5)',
                 backdropFilter: 'blur(10px)',
-                padding: '8px 16px',
+                padding: '4px 12px',
                 borderRadius: '20px',
                 border: '1px solid rgba(255, 255, 255, 0.08)'
             }}>
-                <Zap size={11} color={isNearLimit ? '#ef4444' : '#00fff5'} />
+                <Zap size={10} color={isNearLimit ? '#ef4444' : '#00fff5'} />
                 <span>Tokens</span>
                 <div style={{
-                    width: '60px',
+                    width: '40px', // Smaller on mobile
                     height: '3px',
                     background: 'rgba(255, 255, 255, 0.1)',
                     borderRadius: '2px',
@@ -202,23 +211,15 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em'
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 245, 0.6)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 245, 0.4)';
-                    }}
                 >
                     Request More Tokens
                 </button>
             )}
 
-            {/* Input - Fixed width */}
+            {/* Input - Responsive width */}
             <form onSubmit={sendMessage} style={{
                 position: 'relative',
-                width: '75%',
+                width: isMobile ? '95%' : '75%', // Wider on mobile
                 maxWidth: '600px'
             }}>
                 <textarea
@@ -230,7 +231,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                             sendMessage(e);
                         }
                     }}
-                    placeholder="Continue the conversation..."
+                    placeholder="Continue..."
                     disabled={isLoading || isSessionExhausted}
                     style={{
                         width: '100%',
@@ -242,7 +243,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         fontFamily: '"Outfit", sans-serif',
                         letterSpacing: '0.03em',
                         borderRadius: '24px',
-                        padding: '16px 56px 16px 24px',
+                        padding: '16px 50px 16px 20px',
                         outline: 'none',
                         transition: 'all 0.3s',
                         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)',
@@ -274,7 +275,7 @@ export default function InputArea({ input, setInput, sendMessage, isLoading, isS
                         transform: 'translateY(-50%)',
                         background: input.trim() ? 'linear-gradient(135deg, #00fff5, #00cccc)' : 'rgba(255, 255, 255, 0.1)',
                         color: input.trim() ? '#0f0c29' : 'rgba(255, 255, 255, 0.3)',
-                        padding: '12px',
+                        padding: '10px',
                         borderRadius: '50%',
                         border: 'none',
                         cursor: input.trim() ? 'pointer' : 'default',
