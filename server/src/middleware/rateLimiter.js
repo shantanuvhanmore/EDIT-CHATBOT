@@ -10,7 +10,7 @@ export const chatRateLimiter = rateLimit({
         if (req.user.role === 'admin') return 1000;
         return 20; // authenticated users - 20 requests per day
     },
-    store: store, // Use Redis store if available
+    // store property removed to use default in-memory store
     keyGenerator: (req) => {
         // Use userId for authenticated users, fall back to IP
         return req.userId || req.ip;
