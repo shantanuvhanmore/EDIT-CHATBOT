@@ -16,7 +16,7 @@ import { useChat } from './hooks/useChat';
 import { useAuth } from './contexts/AuthContext';
 
 function ChatApp() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading, token } = useAuth();
   const {
     messages,
     input,
