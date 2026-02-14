@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
-import handleChat from './openai.js';
+import { handleChat } from './openai.js';
 import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import sessionStore from './services/sessionStore.js';
