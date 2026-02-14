@@ -165,7 +165,7 @@ export default function MessageList({ messages, onUpdateFeedback }) {
                                         : '0 8px 32px rgba(0, 0, 0, 0.4)'
                                 }}>
                                     {shouldAnimate ? (
-                                        <TypingText text={msg.content} speed={12} />
+                                        <TypingText text={msg.content} speed={5} />
                                     ) : (
                                         <MarkdownContent content={msg.content} />
                                     )}
